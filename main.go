@@ -20,13 +20,23 @@ func main() {
 	)
 	// needs to be declared here not inline so provider is global XXX FIXME
 	r := gin.Default()
-	csh_auth.Init("/auth/login")
-	r.GET("/auth/login", csh_auth.AuthRequest)
-	r.GET("/auth/redir", csh_auth.AuthCallback)
-	r.GET("/auth/logout", csh_auth.AuthLogout)
 
-	r.GET("/", csh_auth.AuthWrapper(index))
-	r.GET("/data", csh_auth.AuthWrapper(action))
+	csh := csh_auth.CSHAuth{}
+	csh.Init(
+		os.Getenv("csh_auth_client_id"),
+		os.Getenv("csh_auth_client_secret"),
+		os.Getenv("csh_auth_jwt_secret"),
+		os.Getenv("csh_auth_state"),
+		os.Getenv("csh_auth_server_host"),
+		os.Getenv("csh_auth_redirect_uri"),
+		"/auth/login",
+	)
+	r.GET("/auth/login", csh.AuthRequest)
+	r.GET("/auth/redir", csh.AuthCallback)
+	r.GET("/auth/logout", csh.AuthLogout)
+
+	r.GET("/", csh.AuthWrapper(index))
+	r.GET("/data", csh.AuthWrapper(action))
 
 	r.Run()
 }
