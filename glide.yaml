@@ -1,0 +1,16 @@
+# The name of this package.
+package: github.com/liam-middlebrook/csh-plug
+
+# External dependencies.
+import:
+- package: github.com/sirupsen/logrus
+- package: github.com/gin-gonic/gin
+- package: github.com/dgrijalva/jwt-go
+- package: github.com/coreos/go-oidc
+- package: golang.org/x/net/context
+- package: golang.org/x/oauth2
+- package: github.com/gin-gonic/gin
+- package: github.com/liam-middlebrook/csh-auth
+  version: dev
+- package: github.com/lib/pq
+- package: github.com/minio/minio-go
