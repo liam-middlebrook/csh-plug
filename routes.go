@@ -17,7 +17,7 @@ func protectedProfile(c *gin.Context){
 }
 
 func index(c *gin.Context){
-    c.Data(http.StatusOK, "text/html", []byte("<html><body><img src=\"/data\"></img><div><p>Upload Feature Coming Soon&trade;</p></div><div><a href=\"https://github.com/liam-middlebrook/plug\">Fork me on GitHub!</a></div></body></html>"))
+    c.Data(http.StatusOK, "text/html", []byte("<html><body><img src=\"/data\"></img><div><p>Upload Feature Coming Soon&trade;</p></div><div><a href=\"https://github.com/liam-middlebrook/csh-plug\">Fork me on GitHub!</a></div></body></html>"))
 }
 
 func action(c *gin.Context){
