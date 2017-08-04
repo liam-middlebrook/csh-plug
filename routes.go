@@ -125,6 +125,9 @@ func upload_view(c *gin.Context) {
 				<input type="submit" value="Upload" name="submit">
 			</form>
 		</div>
+		<div>
+			<a href="https://github.com/liam-middlebrook/csh-plug">CSH: Plug on GitHub</a>
+		</div>
 	</body>
 	</html>
 	`))
