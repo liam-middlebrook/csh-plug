@@ -12,7 +12,7 @@ var con *ldap.Conn
 
 func LDAPInit(host, binddn, bindpw string) {
 	var err error
-	con, err = ldap.DialTLS("tcp", "host", &tls.Config{})
+	con, err = ldap.DialTLS("tcp", host, &tls.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
