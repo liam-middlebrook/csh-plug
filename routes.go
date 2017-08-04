@@ -73,6 +73,8 @@ func upload(c *gin.Context) {
 	imageData, _, err := image.DecodeConfig(data)
 	if err != nil {
 		log.Error(err)
+		c.String(http.StatusUnsupportedMediaType, "Please upload either a JPG or PNG!")
+		return
 	}
 	data.Seek(0, 0)
 	if imageData.Width == 728 && imageData.Height == 200 {
@@ -85,6 +87,8 @@ func upload(c *gin.Context) {
 		MakePlug(plug)
 	} else {
 		log.Error("invalid file dimensions")
+		c.String(http.StatusBadRequest, "Please upload a 728x200 pixel image!")
+		return
 	}
 
 	c.Data(http.StatusOK, "text/html", []byte(`
