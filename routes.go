@@ -5,6 +5,7 @@ import (
 	csh_auth "github.com/liam-middlebrook/csh-auth"
 	log "github.com/sirupsen/logrus"
 	"image"
+	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
@@ -111,6 +112,7 @@ func upload_view(c *gin.Context) {
 	<body>
 		<h2>Upload a Plug!</h2>
 		<p>You will lose 1 drink credit in exchange for a 100 view-limit plug!</p>
+		<p>Plugs must be 728x200 pixels and in PNG, JPG, or GIF format!</p>
 		<div>
 			<form action="/upload" method="post" enctype="multipart/form-data">
 				<input type="file" name="file" id="file">
