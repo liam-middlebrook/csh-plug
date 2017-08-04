@@ -58,13 +58,13 @@ func upload(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		log.Error(err)
-		c.String(http.BadRequest, "Error Reading File")
+		c.String(http.StatusBadRequest, "Error Reading File")
 		return
 	}
 	data, err := file.Open()
 	if err != nil {
 		log.Error(err)
-		c.String(http.BadRequest, "Error Reading File")
+		c.String(http.StatusBadRequest, "Error Reading File")
 		return
 	}
 	defer data.Close()
