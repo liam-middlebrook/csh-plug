@@ -55,11 +55,6 @@ func upload(c *gin.Context) {
 	plug.Owner = claims.UserInfo.Username
 	plug.ViewsRemaining = 100
 
-	if !DecrementCredits(plug.Owner, 1) {
-		c.String(http.StatusPaymentRequired, "Get More Credits!")
-		return
-	}
-
 	file, err := c.FormFile("file")
 	if err != nil {
 		log.Error(err)
@@ -80,6 +75,11 @@ func upload(c *gin.Context) {
 	if imageData.Width == 728 && imageData.Height == 200 {
 		mime := getMime(data)
 		data.Seek(0, 0)
+
+		if !DecrementCredits(plug.Owner, 1) {
+			c.String(http.StatusPaymentRequired, "Get More Credits!")
+			return
+		}
 
 		plug.S3ID = time.Now().Format("2006/01/02/150405") + "-" + plug.Owner + "-" + file.Filename
 		S3AddFile(plug, data, mime)
