@@ -18,6 +18,13 @@ func main() {
 		os.Getenv("S3_ACCESS_ID"),
 		os.Getenv("S3_SECRET_KEY"),
 	)
+
+	LDAPInit(
+		os.Getenv("LDAP_HOST"),
+		os.Getenv("LDAP_BIND_DN"),
+		os.Getenv("LDAP_BIND_PW"),
+	)
+
 	// needs to be declared here not inline so provider is global XXX FIXME
 	r := gin.Default()
 
@@ -37,6 +44,8 @@ func main() {
 
 	r.GET("/", csh.AuthWrapper(index))
 	r.GET("/data", csh.AuthWrapper(action))
+	r.GET("/upload", csh.AuthWrapper(upload_view))
+	r.POST("/upload", csh.AuthWrapper(upload))
 
 	r.Run()
 }

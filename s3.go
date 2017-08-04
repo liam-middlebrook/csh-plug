@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/minio/minio-go"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"net/url"
 	"time"
 )
@@ -24,4 +25,18 @@ func S3PresignPlug(plug Plug) *url.URL {
 	}
 
 	return presignedURL
+}
+
+func S3AddFile(plug Plug, data io.Reader, mime string) {
+	_, err := s3.PutObject("plugs", plug.S3ID, data, mime)
+	if err != nil {
+		log.Error(err)
+	}
+}
+
+func S3DelFile(plug Plug) {
+	err := s3.RemoveObject("plugs", plug.S3ID)
+	if err != nil {
+		log.Error(err)
+	}
 }

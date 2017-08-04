@@ -14,3 +14,4 @@ import:
   version: dev
 - package: github.com/lib/pq
 - package: github.com/minio/minio-go
+- package: gopkg.in/ldap.v2

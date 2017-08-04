@@ -15,6 +15,9 @@ owner           VARCHAR(32) NOT NULL,
 views           INTEGER NOT NULL
 );`
 
+const SQL_CREATE_PLUG = `INSERT into plugs (s3id, owner, views)
+VALUES ($1::text, $2::text, $3::integer)`
+
 func DBInit(db_uri string) {
 	var err error
 	db, err = sql.Open("postgres", db_uri)
@@ -73,7 +76,23 @@ func GetPlug() Plug {
 		if err != nil {
 			log.Error(err)
 		}
+		S3DelFile(finalPlug)
+
+		// try again
+		return GetPlug()
 	}
 
 	return finalPlug
+}
+
+func MakePlug(plug Plug) {
+	_, err := db.Exec(
+		SQL_CREATE_PLUG,
+		plug.S3ID,
+		plug.Owner,
+		plug.ViewsRemaining,
+	)
+	if err != nil {
+		log.Error(err)
+	}
 }
