@@ -22,7 +22,7 @@ func protectedProfile(c *gin.Context) {
 }
 
 func index(c *gin.Context) {
-	c.Data(http.StatusOK, "text/html", []byte("<html><body><img src=\"/data\"></img><div><p>Upload Feature Coming Soon&trade;</p></div><div><a href=\"https://github.com/liam-middlebrook/csh-plug\">Fork me on GitHub!</a></div></body></html>"))
+	c.Redirect(http.StatusFound, "/upload")
 }
 
 func action(c *gin.Context) {
@@ -87,13 +87,30 @@ func upload(c *gin.Context) {
 		log.Error("invalid file dimensions")
 	}
 
-	c.String(http.StatusOK, "Congrations You Done It!")
+	c.Data(http.StatusOK, "text/html", []byte(`
+	<html>
+	<body>
+		<h2>Uploaded a Plug!</h2>
+		<p>Take a look at what you uploaded! (This does not count towards the views for your Plug!)</p>
+		<div>
+			<img src="`+S3PresignPlug(plug).String()+`"></img>
+		</div>
+	</body>
+	</html>
+	`))
+	log.WithFields(log.Fields{
+		"uid":       claims.UserInfo.Username,
+		"plug_id":   plug.ID,
+		"plug_s3id": plug.S3ID,
+	}).Info("Uploaded new Plug!")
 }
 
 func upload_view(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html", []byte(`
 	<html>
 	<body>
+		<h2>Upload a Plug!</h2>
+		<p>You will lose 1 drink credit in exchange for a 100 view-limit plug!</p>
 		<div>
 			<form action="/upload" method="post" enctype="multipart/form-data">
 				<input type="file" name="file" id="file">
