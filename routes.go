@@ -58,11 +58,14 @@ func upload(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		log.Error(err)
+		c.String(http.BadRequest, "Error Reading File")
+		return
 	}
-	log.Info(file.Filename)
 	data, err := file.Open()
 	if err != nil {
 		log.Error(err)
+		c.String(http.BadRequest, "Error Reading File")
+		return
 	}
 	defer data.Close()
 	imageData, _, err := image.DecodeConfig(data)
