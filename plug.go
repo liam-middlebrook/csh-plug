@@ -3,7 +3,7 @@ package main
 import "math/rand"
 import "time"
 
-const DEFAULT_AD_CHANCE = 85
+const DEFAULT_AD_CHANCE = 95
 
 type Plug struct {
 	ID             int
