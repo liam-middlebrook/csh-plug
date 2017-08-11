@@ -13,7 +13,7 @@ type Plug struct {
 }
 
 func (p Plug) IsDefault() bool {
-	return p.ViewsRemaining >= 0
+	return p.ViewsRemaining < 0
 }
 
 func ChoosePlug(plugs []Plug) Plug {
