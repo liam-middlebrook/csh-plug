@@ -22,6 +22,23 @@ func LDAPInit(host, binddn, bindpw string) {
 	}
 }
 
+func CheckIfAdmin(username string) bool {
+	searchRequest := ldap.NewSearchRequest(
+		"ou=Users,dc=csh,dc=rit,dc=edu",
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		"(&(|(memberof=cn=drink,ou=Groups,dc=csh,dc=rit,dc=edu)(memberof=cn=rtp,ou=Groups,dc=csh,dc=rit,dc=edu)(memberof=cn=eboard,ou=Groups,dc=csh,dc=rit,dc=edu))(uid="+username+"))",
+		[]string{"uid"},
+		nil,
+	)
+
+	sr, err := con.Search(searchRequest)
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return len(sr.Entries) > 0
+}
+
 func DecrementCredits(username string, credits int) bool {
 	searchRequest := ldap.NewSearchRequest(
 		"uid="+username+",ou=Users,dc=csh,dc=rit,dc=edu",

@@ -10,6 +10,12 @@ type Plug struct {
 	S3ID           string
 	Owner          string
 	ViewsRemaining int
+	Approved       bool
+	PresignedURL   string
+}
+
+type PlugList struct {
+	Data []string `form:"plugs[]"`
 }
 
 func (p Plug) IsDefault() bool {

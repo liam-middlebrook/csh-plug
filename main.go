@@ -27,6 +27,7 @@ func main() {
 
 	// needs to be declared here not inline so provider is global XXX FIXME
 	r := gin.Default()
+	r.LoadHTMLGlob("templates/*")
 
 	csh := csh_auth.CSHAuth{}
 	csh.Init(
@@ -46,6 +47,9 @@ func main() {
 	r.GET("/data", csh.AuthWrapper(action))
 	r.GET("/upload", csh.AuthWrapper(upload_view))
 	r.POST("/upload", csh.AuthWrapper(upload))
+
+	r.GET("/admin", csh.AuthWrapper(get_pending_plugs))
+	r.POST("/admin", csh.AuthWrapper(plug_approval))
 
 	r.Run()
 }

@@ -1,0 +1,14 @@
+<html>
+    <p>Cool Body Bro!</p>
+    <form action="/admin" method="POST">
+    {{ range $element := .plugs }}
+        <li>
+		<img src="{{$element.PresignedURL}}"/><br/>
+		Uploaded By: {{$element.Owner}} {{$element.ViewsRemaining}} Views Remaining!
+		<input type="checkbox" name="plugs[]" value="{{$element.ID}}" id="{{$element.ID}}" {{ if $element.Approved }} checked {{ end }}/>
+		<label for="{{$element.ID}}">Approved for Viewing</label>
+	</li>
+    {{ end }}
+    <input type="submit" />
+    </form>
+</html>

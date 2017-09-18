@@ -9,6 +9,7 @@ import (
 	_ "image/png"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -99,6 +100,7 @@ func upload(c *gin.Context) {
 	<body>
 		<h2>Uploaded a Plug!</h2>
 		<p>Take a look at what you uploaded! (This does not count towards the views for your Plug!)</p>
+		<p>Due to High Volumes your Plug MUST be approved by a member of any of the following groups (drink, eboard, rtp)! Check /admin</p>
 		<div>
 			<img src="`+S3PresignPlug(plug).String()+`"></img>
 		</div>
@@ -119,6 +121,7 @@ func upload_view(c *gin.Context) {
 		<h2>Upload a Plug!</h2>
 		<p>You will lose 1 drink credit in exchange for a 100 view-limit plug!</p>
 		<p>Plugs must be 728x200 pixels and in PNG, or JPG format!</p>
+		<p>Due to High Volumes your Plug MUST be approved by a member of any of the following groups (drink, eboard, rtp)! Check /admin</p>
 		<div>
 			<form action="/upload" method="post" enctype="multipart/form-data">
 				<input type="file" name="file" id="file">
@@ -134,6 +137,54 @@ alert("The CSH CodeOfConduct Section 8 prohibits the sending of content that may
 	</body>
 	</html>
 	`))
+}
+
+func get_pending_plugs(c *gin.Context) {
+	claims, ok := c.Value(csh_auth.AuthKey).(csh_auth.CSHClaims)
+	if !ok {
+		log.Fatal("error finding claims")
+		return
+	}
+
+	if !CheckIfAdmin(claims.UserInfo.Username) {
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+	plugs := GetPendingPlugs()
+	var out_plugs []Plug
+
+	for _, plug := range plugs {
+		new := plug
+		new.PresignedURL = S3PresignPlug(plug).String()
+		out_plugs = append(out_plugs, new)
+	}
+	c.HTML(http.StatusOK, "view_plugs.tmpl", gin.H{
+		"plugs": out_plugs,
+	})
+}
+
+func plug_approval(c *gin.Context) {
+	claims, ok := c.Value(csh_auth.AuthKey).(csh_auth.CSHClaims)
+	if !ok {
+		log.Fatal("error finding claims")
+		return
+	}
+
+	if !CheckIfAdmin(claims.UserInfo.Username) {
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	var plugList PlugList
+	c.Bind(&plugList)
+
+	log.WithFields(log.Fields{
+		"uid":            claims.UserInfo.Username,
+		"plugs_approved": strings.Join(plugList.Data, ","),
+	}).Info("Changed Approved Plug List")
+
+	SetPendingPlugs(plugList.Data)
+	c.Redirect(http.StatusFound, "/admin")
 }
 
 func getMime(data io.Reader) string {
