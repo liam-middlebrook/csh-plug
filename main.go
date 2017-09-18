@@ -27,7 +27,7 @@ func main() {
 
 	// needs to be declared here not inline so provider is global XXX FIXME
 	r := gin.Default()
-	r.LoadHTMLGlob("templates/*")
+	r.LoadHTMLGlob(os.Getenv("BASE_PATH") + "templates/*")
 
 	csh := csh_auth.CSHAuth{}
 	csh.Init(
