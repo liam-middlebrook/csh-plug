@@ -94,7 +94,7 @@ func upload(c *gin.Context) {
 		c.String(http.StatusBadRequest, "Please upload a 728x200 pixel image!")
 		return
 	}
-
+	AddLog(0, "uid: "+claims.UserInfo.Username+"uploaded plug id: "+string(plug.ID))
 	c.Data(http.StatusOK, "text/html", []byte(`
 	<html>
 	<body>
@@ -182,6 +182,8 @@ func plug_approval(c *gin.Context) {
 		"uid":            claims.UserInfo.Username,
 		"plugs_approved": strings.Join(plugList.Data, ","),
 	}).Info("Changed Approved Plug List")
+
+	AddLog(0, "uid: "+claims.UserInfo.Username+"approved: "+strings.Join(plugList.Data, ","))
 
 	SetPendingPlugs(plugList.Data)
 	c.Redirect(http.StatusFound, "/admin")

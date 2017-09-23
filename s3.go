@@ -28,7 +28,7 @@ func S3PresignPlug(plug Plug) *url.URL {
 }
 
 func S3AddFile(plug Plug, data io.Reader, mime string) {
-	_, err := s3.PutObject("plugs", plug.S3ID, data, mime)
+	_, err := s3.PutObject("plugs", plug.S3ID, data, -1, &minio.PutObjectOptions{ContentType: mime})
 	if err != nil {
 		log.Error(err)
 	}

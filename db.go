@@ -5,6 +5,7 @@ import (
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"strings"
+	"time"
 )
 
 var db *sql.DB
@@ -15,6 +16,12 @@ s3id            VARCHAR(64) NOT NULL,
 owner           VARCHAR(32) NOT NULL,
 views           INTEGER NOT NULL,
 approved        BOOLEAN NOT NULL
+);`
+
+const SQL_CREATE_LOG_TABLE = `CREATE TABLE logs (
+time            TIMESTAMP PRIMARY KEY,
+severity        INTEGER NOT NULL,
+message         TEXT NOT NULL
 );`
 
 const SQL_CREATE_PLUG = `INSERT into plugs (s3id, owner, views, approved)
@@ -30,6 +37,9 @@ WHERE $1::text LIKE CONCAT('%,',id,',%');`
 
 const SQL_DELETE_PLUG = `DELETE from plugs WHERE id=$1::integer;`
 
+const SQL_INSERT_LOG = `INSERT into logs (time, severity, message)
+VALUES ($1::text, $2::integer, $3::text)`
+
 func DBInit(db_uri string) {
 	var err error
 	db, err = sql.Open("postgres", db_uri)
@@ -38,6 +48,7 @@ func DBInit(db_uri string) {
 	}
 
 	create_table_safe("plugs", SQL_CREATE_PLUGS)
+	create_table_safe("logs", SQL_CREATE_LOG_TABLE)
 }
 
 func create_table_safe(name, sql string) {
@@ -129,6 +140,18 @@ func SetPendingPlugs(approvedList []string) {
 
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func AddLog(severity int, message string) {
+	_, err := db.Exec(
+		SQL_INSERT_LOG,
+		time.Now().Format("2006-01-02T15:04:05.000000Z"),
+		severity,
+		message)
+
+	if err != nil {
+		log.Error(err)
 	}
 }
 
