@@ -15,10 +15,12 @@ func LDAPInit(host, binddn, bindpw string) {
 	con, err = ldap.DialTLS("tcp", host, &tls.Config{ServerName: "ldap.csh.rit.edu"})
 	if err != nil {
 		log.Fatal(err)
+		AddLog(0, "ldap connection error: "+err.Error())
 	}
 	err = con.Bind(binddn, bindpw)
 	if err != nil {
 		log.Fatal(err)
+		AddLog(0, "ldap bind error: "+err.Error())
 	}
 }
 
@@ -34,6 +36,7 @@ func CheckIfAdmin(username string) bool {
 	sr, err := con.Search(searchRequest)
 	if err != nil {
 		log.Fatal(err)
+		AddLog(0, "ldap search error: "+err.Error())
 		return false
 	}
 	return len(sr.Entries) > 0
@@ -51,11 +54,13 @@ func DecrementCredits(username string, credits int) bool {
 	sr, err := con.Search(searchRequest)
 	if err != nil {
 		log.Fatal(err)
+		AddLog(0, "ldap search error: "+err.Error())
 	}
 
 	balance, err := strconv.Atoi(sr.Entries[0].GetAttributeValue("drinkBalance"))
 	if err != nil {
 		log.Fatal(err)
+		AddLog(0, "ldap result parse error: "+err.Error())
 	}
 	log.Info("current balance for %s is %d", username, balance)
 
@@ -71,6 +76,7 @@ func DecrementCredits(username string, credits int) bool {
 	err = con.Modify(modifyRequest)
 	if err != nil {
 		log.Fatal(err)
+		AddLog(0, "ldap modification error: "+err.Error())
 	}
 	log.Info("current balance for %s is %d", username, newBalance)
 
