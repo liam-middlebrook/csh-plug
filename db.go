@@ -38,7 +38,7 @@ WHERE $1::text LIKE CONCAT('%,',id,',%');`
 const SQL_DELETE_PLUG = `DELETE from plugs WHERE id=$1::integer;`
 
 const SQL_INSERT_LOG = `INSERT into logs (time, severity, message)
-VALUES ($1::text, $2::integer, $3::text)`
+VALUES ($1, $2::integer, $3::text)`
 
 func DBInit(db_uri string) {
 	var err error
@@ -146,7 +146,7 @@ func SetPendingPlugs(approvedList []string) {
 func AddLog(severity int, message string) {
 	_, err := db.Exec(
 		SQL_INSERT_LOG,
-		time.Now().Format("2006-01-02T15:04:05.000000Z"),
+		time.Now(),
 		severity,
 		message)
 
