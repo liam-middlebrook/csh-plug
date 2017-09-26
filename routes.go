@@ -94,7 +94,7 @@ func upload(c *gin.Context) {
 		c.String(http.StatusBadRequest, "Please upload a 728x200 pixel image!")
 		return
 	}
-	AddLog(1, "uid: "+claims.UserInfo.Username+"uploaded plug id: "+string(plug.ID))
+	AddLog(1, "uid: "+plug.Owner+"uploaded plug s3id"+plug.S3ID)
 	c.Data(http.StatusOK, "text/html", []byte(`
 	<html>
 	<body>
