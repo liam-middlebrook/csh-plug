@@ -148,6 +148,9 @@ func upload_view(c *gin.Context) {
         			<br />
 				<a href="https://github.com/liam-middlebrook/csh-plug">Click here for CSH Plug on GitHub</a>
 			</div>
+			<script>
+ 			alert("The CSH CodeOfConduct Section 8 prohibits the sending of content that may harass others. Please review the CSH CodeOfConduct before uploading content to Plug.");
+ 			</script>
 		</body>
                 </center>
 	</html>
