@@ -41,6 +41,7 @@ func action(c *gin.Context) {
 		"plug_s3id":     plug.S3ID,
 		"presigned_uri": url.String(),
 	}).Info("Presigned URI Generated")
+	AddLog(13, c.GetHeader("Referer"))
 	c.Redirect(http.StatusFound, url.String())
 }
 
