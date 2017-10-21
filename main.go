@@ -12,7 +12,7 @@ func main() {
 	flag.Parse()
 
 	log.Info("Starting server...")
-	DBInit(os.Getenv("DB_URI"))
+	DBInit("DB_URI")
 	S3Init(
 		os.Getenv("S3_HOST"),
 		os.Getenv("S3_ACCESS_ID"),

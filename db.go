@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
+	"os"
 	"strings"
 	"time"
 )
 
 var db *sql.DB
+var db_env_var_name string
 
 const SQL_CREATE_PLUGS = `CREATE TABLE plugs (
 id              SERIAL PRIMARY KEY,
@@ -40,13 +42,23 @@ const SQL_DELETE_PLUG = `DELETE from plugs WHERE id=$1::integer;`
 const SQL_INSERT_LOG = `INSERT into logs (time, severity, message)
 VALUES ($1, $2::integer, $3::text)`
 
-func DBInit(db_uri string) {
-	var err error
-	db, err = sql.Open("postgres", db_uri)
+func reconnectToDB() *sql.DB {
+	db_con, err := sql.Open("postgres", os.Getenv(db_env_var_name))
 	if err != nil {
 		log.Fatal("error connecting to db!")
 	}
+	return db_con
+}
 
+func pingDBAlive() {
+	if db.Ping() != nil {
+		db = reconnectToDB()
+	}
+}
+
+func DBInit(env_var_name string) {
+	db_env_var_name = env_var_name
+	db = reconnectToDB()
 	create_table_safe("plugs", SQL_CREATE_PLUGS)
 	create_table_safe("logs", SQL_CREATE_LOG_TABLE)
 }
