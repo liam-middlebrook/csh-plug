@@ -20,9 +20,9 @@ func main() {
 	)
 
 	LDAPInit(
-		os.Getenv("LDAP_HOST"),
-		os.Getenv("LDAP_BIND_DN"),
-		os.Getenv("LDAP_BIND_PW"),
+		"LDAP_HOST",
+		"LDAP_BIND_DN",
+		"LDAP_BIND_PW",
 	)
 
 	// needs to be declared here not inline so provider is global XXX FIXME
