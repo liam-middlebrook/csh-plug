@@ -55,7 +55,7 @@ func upload(c *gin.Context) {
 	}
 
 	plug.Owner = claims.UserInfo.Username
-	plug.ViewsRemaining = 500
+	plug.ViewsRemaining = 1000
 
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -120,7 +120,7 @@ func upload_view(c *gin.Context) {
 	<html>
 	<body>
 		<h2>Upload a Plug!</h2>
-		<p>You will lose 1 drink credit in exchange for a 500 view-limit plug!</p>
+		<p>You will lose 1 drink credit in exchange for a 1000 view-limit plug!</p>
 		<p>Plugs must be 728x200 pixels and in PNG, or JPG format!</p>
 		<p>Due to High Volumes your Plug MUST be approved by a member of any of the following groups (drink, eboard, rtp)! Check /admin</p>
 		<div>
