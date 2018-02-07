@@ -97,16 +97,83 @@ func upload(c *gin.Context) {
 	}
 	AddLog(1, "uid: "+plug.Owner+"uploaded plug s3id"+plug.S3ID)
 	c.Data(http.StatusOK, "text/html", []byte(`
-	<html>
-	<body>
-		<h2>Uploaded a Plug!</h2>
-		<p>Take a look at what you uploaded! (This does not count towards the views for your Plug!)</p>
-		<p>Due to High Volumes your Plug MUST be approved by a member of any of the following groups (drink, eboard, rtp)! Check /admin</p>
-		<div>
-			<img src="`+S3PresignPlug(plug).String()+`"></img>
-		</div>
-	</body>
-	</html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="https://s3.csh.rit.edu/csh-material-bootstrap/4.0.0-beta.3/dist/csh-material-bootstrap.min.css" media="screen">
+    <style>
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            margin-bottom: 60px;
+            /* Margin bottom by footer height */
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            /* Set the fixed height of the footer here */
+            line-height: 60px;
+            /* Vertically center the text there */
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+
+<body>
+    <form action="/admin" method="POST">
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="/upload">Plug</a>
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/upload">Upload</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">Admin <span class="sr-only">(current)</span></a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+                    <div class="card mb-3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+                    <div class="card mb-3">
+                        <h3 class="card-header">Success!</h3>
+                        <img style="width: 100%; display: block;" src="`+S3PresignPlug(plug).String()+`" alt="Card image">
+
+                        <div class="card-footer text-muted">
+                            This is how your Plug will appear on CSH sites. (This does not count towards the views for your Plug.)<br><br>Your Plug must be approved before it will appear for viewing. Any member of the following groups (drink, eboard, rtp) can do so via the admin page.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+    <footer class="footer">
+        <div class="container">
+            <span class="text-muted">CSH Plug on <a href="https://github.com/liam-middlebrook/csh-plug">GitHub</a></span>
+        </div>
+    </footer>
+</body>
+
+</html>
 	`))
 	log.WithFields(log.Fields{
 		"uid":       claims.UserInfo.Username,
@@ -118,25 +185,111 @@ func upload(c *gin.Context) {
 func upload_view(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html", []byte(`
 	<html>
-	<body>
-		<h2>Upload a Plug!</h2>
-		<p>You will lose 1 drink credit in exchange for a 1000 view-limit plug!</p>
-		<p>Plugs must be 728x200 pixels and in PNG, or JPG format!</p>
-		<p>Due to High Volumes your Plug MUST be approved by a member of any of the following groups (drink, eboard, rtp)! Check /admin</p>
-		<div>
-			<form action="/upload" method="post" enctype="multipart/form-data">
-				<input type="file" name="file" id="file">
-				<input type="submit" value="Upload" name="submit">
-			</form>
-		</div>
-		<div>
-			<a href="https://github.com/liam-middlebrook/csh-plug">CSH: Plug on GitHub</a>
-		</div>
-		<script>
-alert("The CSH CodeOfConduct Section 8 prohibits the sending of content that may harass others. Please review the CSH CodeOfConduct before uploading content to Plug.");
-		</script>
-	</body>
-	</html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <link rel="stylesheet" href="https://s3.csh.rit.edu/csh-material-bootstrap/4.0.0-beta.3/dist/csh-material-bootstrap.min.css" media="screen">
+    <style>
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            margin-bottom: 60px;
+            /* Margin bottom by footer height */
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            /* Set the fixed height of the footer here */
+            line-height: 60px;
+            /* Vertically center the text there */
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/upload">Plug</a>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/upload">Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin">Admin <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="jumbotron">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="jumbotron" style="max-width: 800px">
+                    <h1 class="display-3">Upload a Plug!</h1>
+                    <p class="lead">You will lose 1 drink credit in exchange for a 1000 view-limit of your plug.<br> Plugs must be 728x200 pixels and in PNG, or JPG format</p>
+                    <hr class="my-4">
+
+                    <div class="form-group">
+                        <input class="form-control-file" id="exampleInputFile" aria-describedby="fileHelp" type="file">
+                        <small id="fileHelp" class="form-text text-muted">Your Plug must be approved before it will appear for viewing. Any member of the following groups (drink, eboard, rtp) can do so via the admin page.</small>
+                    </div>
+                    <div class="float-right">
+                        <form action="/upload" method="post" enctype="multipart/form-data">
+                            <input class="btn btn-primary btn-lg" href="/upload" role="button" value="Upload" name="submit" type="submit"> </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="agreementModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">User Agreement</h5>
+                </div>
+                <div class="modal-body">
+                    <p>The CSH Code Of Conduct Section 8 prohibits the sending of content that may harass others.</p>
+                    <p>Please review the <a href="http://latex.aslushnikov.com/compile?url=https%3A%2F%2Fraw.githubusercontent.com%2FComputerScienceHouse%2FCodeOfConduct%2Fmaster%2Fcsh-coc.tex" target="_blank">CSH Code Of Conduct</a> before uploading content to Plug.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Agree</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div>
+
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <span class="text-muted">CSH Plug on <a href="https://github.com/liam-middlebrook/csh-plug">GitHub</a></span>
+        </div>
+    </footer>
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+    <script>
+        <!--        $('#agreementModal').modal('show') -->
+    </script>
+
+</body>
+
+</html>
 	`))
 }
 
