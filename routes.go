@@ -97,7 +97,7 @@ func upload(c *gin.Context) {
 	}
 	AddLog(1, "uid: "+plug.Owner+"uploaded plug s3id"+plug.S3ID)
 	   c.HTML(http.StatusOK, "success.tmpl", gin.H{
-       "plug_s3id": plug.S3ID,
+          "plugs": out_plugs,
 	   })    
 	log.WithFields(log.Fields{
 		"uid":       claims.UserInfo.Username,
