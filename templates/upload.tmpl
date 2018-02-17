@@ -29,14 +29,15 @@
                     <p class="lead">You will lose 1 drink credit in exchange for a 1000 view-limit of your plug.<br> Plugs must be 728x200 pixels and in PNG, or JPG format</p>
                     <hr class="my-4">
 
-                    <div class="form-group">
-                        <input class="form-control-file" id="fileUpload" name="fileUpload" aria-describedby="fileHelp" type="file">
-                        <small id="fileHelp" class="form-text text-muted">Your Plug must be approved before it will appear for viewing. Any member of the following groups (drink, eboard, rtp) can do so via the admin page.</small>
-                    </div>
-                    <div class="float-right">
-                        <form action="/upload" method="post" enctype="multipart/form-data">
-                            <input class="btn btn-primary btn-lg" href="/upload" role="button" value="Upload" name="submit" type="submit"> </form>
-                    </div>
+                    <form action="/upload" method="post" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input class="form-control-file" id="fileUpload" name="fileUpload" aria-describedby="fileHelp" type="file">
+                            <small id="fileHelp" class="form-text text-muted">Your Plug must be approved before it will appear for viewing. Any member of the following groups (drink, eboard, rtp) can do so via the admin page.</small>
+                        </div>
+                        <div class="float-right">
+                            <input class="btn btn-primary btn-lg" href="/upload" role="button" value="Upload" name="submit" type="submit">
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
