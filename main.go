@@ -27,7 +27,11 @@ func main() {
 
 	// needs to be declared here not inline so provider is global XXX FIXME
 	r := gin.Default()
+	// TODO we should probably look into a different templating solution that
+	// allows for inheritance so we can have a navigation and base page layout
+	// not be repeated.
 	r.LoadHTMLGlob(os.Getenv("BASE_PATH") + "templates/*")
+	r.Static("/static", os.Getenv("BASE_PATH")+"static")
 
 	csh := csh_auth.CSHAuth{}
 	csh.Init(

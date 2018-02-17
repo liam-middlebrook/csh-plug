@@ -1,14 +1,69 @@
 <html>
-    <p>Cool Body Bro!</p>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="https://s3.csh.rit.edu/csh-material-bootstrap/4.0.0-beta.3/dist/csh-material-bootstrap.min.css" media="screen">
+    <link rel="stylesheet" href="/static/plug.css">
+</head>
+
+<body>
     <form action="/admin" method="POST">
-    {{ range $element := .plugs }}
-        <li>
-		<img src="{{$element.PresignedURL}}"/><br/>
-		Uploaded By: {{$element.Owner}} {{$element.ViewsRemaining}} Views Remaining!
-		<input type="checkbox" name="plugs[]" value="{{$element.ID}}" id="{{$element.ID}}" {{ if $element.Approved }} checked {{ end }}/>
-		<label for="{{$element.ID}}">Approved for Viewing</label>
-	</li>
-    {{ end }}
-    <input type="submit" />
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="/upload">Plug</a>
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">Upload</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/admin">Admin <span class="sr-only">(current)</span></a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container">
+
+
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+                    <div class="alert alert-dismissible alert-info">
+                        Click the update button to approve the selected Plugs for viewing.
+                    </div>
+                    <input class="btn btn-primary btn-lg" role="button" value="Update" name="submit" type="submit">
+                    <p></p>
+                </div>
+            </div>
+            {{ range $element := .plugs }}
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+                    <div class="card mb-3">
+                        <h3 class="card-header">Uploaded By: {{$element.Owner}}</h3>
+                        <img style="width: 100%; display: block;" src="{{$element.PresignedURL}}" alt="Plug by {{$element.Owner}}">
+                        <div class="card-footer text-muted">
+                            <input type="checkbox" name="plugs[]" value="{{$element.ID}}" id="{{$element.ID}}" {{ if $element.Approved }} checked {{ end }}/>
+                            <label for="{{$element.ID}}">Approved for Viewing</label> ({{$element.ViewsRemaining}} Remaining)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{ end }}
+
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+                    <input class="btn btn-primary btn-lg" role="button" value="Update" name="submit" type="submit">
+                </div>
+            </div>
+
+        </div>
+
     </form>
+
+    <footer class="footer">
+        <div class="container">
+            <span class="text-muted">CSH Plug on <a href="https://github.com/liam-middlebrook/csh-plug">GitHub</a></span>
+        </div>
+    </footer>
+</body>
+
 </html>

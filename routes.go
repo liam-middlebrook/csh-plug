@@ -57,7 +57,7 @@ func upload(c *gin.Context) {
 	plug.Owner = claims.UserInfo.Username
 	plug.ViewsRemaining = 1000
 
-	file, err := c.FormFile("file")
+	file, err := c.FormFile("fileUpload")
 	if err != nil {
 		log.Error(err)
 		c.String(http.StatusBadRequest, "Error Reading File")
@@ -96,18 +96,9 @@ func upload(c *gin.Context) {
 		return
 	}
 	AddLog(1, "uid: "+plug.Owner+"uploaded plug s3id"+plug.S3ID)
-	c.Data(http.StatusOK, "text/html", []byte(`
-	<html>
-	<body>
-		<h2>Uploaded a Plug!</h2>
-		<p>Take a look at what you uploaded! (This does not count towards the views for your Plug!)</p>
-		<p>Due to High Volumes your Plug MUST be approved by a member of any of the following groups (drink, eboard, rtp)! Check /admin</p>
-		<div>
-			<img src="`+S3PresignPlug(plug).String()+`"></img>
-		</div>
-	</body>
-	</html>
-	`))
+	c.HTML(http.StatusOK, "success.tmpl", gin.H{
+		"plug_s3url": S3PresignPlug(plug).String(),
+	})
 	log.WithFields(log.Fields{
 		"uid":       claims.UserInfo.Username,
 		"plug_id":   plug.ID,
@@ -116,28 +107,7 @@ func upload(c *gin.Context) {
 }
 
 func upload_view(c *gin.Context) {
-	c.Data(http.StatusOK, "text/html", []byte(`
-	<html>
-	<body>
-		<h2>Upload a Plug!</h2>
-		<p>You will lose 1 drink credit in exchange for a 1000 view-limit plug!</p>
-		<p>Plugs must be 728x200 pixels and in PNG, or JPG format!</p>
-		<p>Due to High Volumes your Plug MUST be approved by a member of any of the following groups (drink, eboard, rtp)! Check /admin</p>
-		<div>
-			<form action="/upload" method="post" enctype="multipart/form-data">
-				<input type="file" name="file" id="file">
-				<input type="submit" value="Upload" name="submit">
-			</form>
-		</div>
-		<div>
-			<a href="https://github.com/liam-middlebrook/csh-plug">CSH: Plug on GitHub</a>
-		</div>
-		<script>
-alert("The CSH CodeOfConduct Section 8 prohibits the sending of content that may harass others. Please review the CSH CodeOfConduct before uploading content to Plug.");
-		</script>
-	</body>
-	</html>
-	`))
+	c.HTML(http.StatusOK, "upload.tmpl", gin.H{})
 }
 
 func get_pending_plugs(c *gin.Context) {

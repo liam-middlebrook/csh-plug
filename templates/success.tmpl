@@ -1,0 +1,50 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="https://s3.csh.rit.edu/csh-material-bootstrap/4.0.0-beta.3/dist/csh-material-bootstrap.min.css" media="screen">
+    <link rel="stylesheet" href="/static/plug.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/upload">Plug</a>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/upload">Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin">Admin <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="card mb-3">
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="card mb-3">
+                    <h3 class="card-header">Success!</h3>
+                    <img style="width: 100%; display: block;" src="{{plug_s3url}}" alt="Plug Preview">
+
+                    <div class="card-footer text-muted">
+                    This is how your Plug will appear on CSH sites. (This does not count towards the views for your Plug.)<br><br>Your Plug must be approved before it will appear for viewing. Any member of the following groups (drink, eboard, rtp) can do so via the admin page.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="container">
+            <span class="text-muted">CSH Plug on <a href="https://github.com/liam-middlebrook/csh-plug">GitHub</a></span>
+        </div>
+    </footer>
+</body>
+
+</html>
