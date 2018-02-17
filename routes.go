@@ -57,7 +57,7 @@ func upload(c *gin.Context) {
 	plug.Owner = claims.UserInfo.Username
 	plug.ViewsRemaining = 1000
 
-	file, err := c.FormFile("file")
+	file, err := c.FormFile("fileUpload")
 	if err != nil {
 		log.Error(err)
 		c.String(http.StatusBadRequest, "Error Reading File")
@@ -96,9 +96,9 @@ func upload(c *gin.Context) {
 		return
 	}
 	AddLog(1, "uid: "+plug.Owner+"uploaded plug s3id"+plug.S3ID)
-	   c.HTML(http.StatusOK, "success.tmpl", gin.H{
-          "plugs": out_plugs,
-	   })    
+	c.HTML(http.StatusOK, "success.tmpl", gin.H{
+		"plug_s3url": S3PresignPlug(plug).String(),
+	})
 	log.WithFields(log.Fields{
 		"uid":       claims.UserInfo.Username,
 		"plug_id":   plug.ID,
@@ -107,7 +107,7 @@ func upload(c *gin.Context) {
 }
 
 func upload_view(c *gin.Context) {
-    	c.HTML(http.StatusOK, "upload.tmpl")
+	c.HTML(http.StatusOK, "upload.tmpl", gin.H{})
 }
 
 func get_pending_plugs(c *gin.Context) {
