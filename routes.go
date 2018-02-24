@@ -9,6 +9,7 @@ import (
 	_ "image/png"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -157,6 +158,29 @@ func plug_approval(c *gin.Context) {
 	AddLog(1, "uid: "+claims.UserInfo.Username+"approved: "+strings.Join(plugList.Data, ","))
 
 	SetPendingPlugs(plugList.Data)
+	c.Redirect(http.StatusFound, "/admin")
+}
+
+func plug_deletion(c *gin.Context) {
+	claims, ok := c.Value(csh_auth.AuthKey).(csh_auth.CSHClaims)
+	if !ok {
+		log.Fatal("error finding claims")
+		return
+	}
+
+	if !CheckIfAdmin(claims.UserInfo.Username) {
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		log.Error(err)
+	}
+
+	DeletePlug(GetPlugById(id))
+
 	c.Redirect(http.StatusFound, "/admin")
 }
 

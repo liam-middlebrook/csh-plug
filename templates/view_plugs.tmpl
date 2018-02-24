@@ -43,6 +43,7 @@
                         <div class="card-footer text-muted">
                             <input type="checkbox" name="plugs[]" value="{{$element.ID}}" id="{{$element.ID}}" {{ if $element.Approved }} checked {{ end }}/>
                             <label for="{{$element.ID}}">Approved for Viewing</label> ({{$element.ViewsRemaining}} Remaining)
+                            <button type="submit" formaction="/admin/delete/{{$element.ID}}">Delete</button>
                         </div>
                     </div>
                 </div>

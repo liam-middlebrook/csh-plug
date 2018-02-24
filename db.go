@@ -31,6 +31,8 @@ VALUES ($1::text, $2::text, $3::integer, false)`
 
 const SQL_RETRIEVE_APPROVED_PLUGS = `SELECT id, s3id, owner, views FROM plugs WHERE approved=true`
 
+const SQL_RETRIEVE_PLUG_BY_ID = `SELECT s3id, owner, views, approved FROM plugs WHERE id=$1::integer`
+
 const SQL_RETRIEVE_PENDING_PLUGS = `SELECT id, s3id, owner, views, approved FROM plugs WHERE views>=0`
 
 const SQL_SET_PENDING_PLUGS = `UPDATE plugs
@@ -107,17 +109,45 @@ func GetPlug() Plug {
 		}
 	}
 	if finalPlug.ViewsRemaining == 0 {
-		_, err = db.Exec(SQL_DELETE_PLUG, finalPlug.ID)
-		if err != nil {
-			log.Error(err)
-		}
-		S3DelFile(finalPlug)
-
+		DeletePlug(finalPlug)
 		// try again
 		return GetPlug()
 	}
 
 	return finalPlug
+}
+
+func GetPlugById(id int) Plug {
+	rows, err := db.Query(SQL_RETRIEVE_PLUG_BY_ID, id)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var obj Plug
+	obj.ID = id
+	for rows.Next() {
+		err = rows.Scan(&obj.S3ID, &obj.Owner, &obj.ViewsRemaining, &obj.Approved)
+
+		if err != nil {
+			log.Error(err)
+		}
+
+		// Return after first result
+		return obj
+	}
+
+	log.Fatal("We should not be able to reach this point!")
+	return obj
+}
+
+func DeletePlug(plug Plug) {
+	_, err := db.Exec(SQL_DELETE_PLUG, plug.ID)
+	if err != nil {
+		log.Error(err)
+	}
+	S3DelFile(plug)
+
 }
 
 func GetPendingPlugs() []Plug {

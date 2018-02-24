@@ -54,6 +54,7 @@ func main() {
 
 	r.GET("/admin", csh.AuthWrapper(get_pending_plugs))
 	r.POST("/admin", csh.AuthWrapper(plug_approval))
+	r.POST("/admin/delete/:id", csh.AuthWrapper(plug_deletion))
 
 	r.Run()
 }
