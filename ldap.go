@@ -53,9 +53,9 @@ func LDAPInit(host, binddn, bindpw string) {
 func CheckIfAdmin(username string) bool {
 	pingLDAPAlive()
 	searchRequest := ldap.NewSearchRequest(
-		"ou=Users,dc=csh,dc=rit,dc=edu",
+		"cn=users,cn=accounts,dc=csh,dc=rit,dc=edu",
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		"(&(|(memberof=cn=drink,ou=Groups,dc=csh,dc=rit,dc=edu)(memberof=cn=rtp,ou=Groups,dc=csh,dc=rit,dc=edu)(memberof=cn=eboard,ou=Groups,dc=csh,dc=rit,dc=edu))(uid="+username+"))",
+		"(&(|(memberof=cn=drink,cn=groups,cn=accounts,dc=csh,dc=rit,dc=edu)(memberof=cn=rtp,cn=groups,cn=accounts,dc=csh,dc=rit,dc=edu)(memberof=cn=eboard,cn=groups,cn=accounts,dc=csh,dc=rit,dc=edu))(uid="+username+"))",
 		[]string{"uid"},
 		nil,
 	)
@@ -72,7 +72,7 @@ func CheckIfAdmin(username string) bool {
 func DecrementCredits(username string, credits int) bool {
 	pingLDAPAlive()
 	searchRequest := ldap.NewSearchRequest(
-		"uid="+username+",ou=Users,dc=csh,dc=rit,dc=edu",
+		"uid="+username+",cn=users,cn=accounts,dc=csh,dc=rit,dc=edu",
 		ldap.ScopeBaseObject, ldap.NeverDerefAliases, 0, 0, false,
 		"(objectClass=*)",
 		[]string{"drinkBalance"},
@@ -99,7 +99,7 @@ func DecrementCredits(username string, credits int) bool {
 		return false
 	}
 
-	modifyRequest := ldap.NewModifyRequest("uid=" + username + ",ou=Users,dc=csh,dc=rit,dc=edu")
+	modifyRequest := ldap.NewModifyRequest("uid=" + username + ",cn=users,cn=accounts,dc=csh,dc=rit,dc=edu")
 	modifyRequest.Replace("drinkBalance", []string{fmt.Sprintf("%d", newBalance)})
 	err = con.Modify(modifyRequest)
 	if err != nil {
