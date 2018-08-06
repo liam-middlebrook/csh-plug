@@ -16,7 +16,7 @@ type LDAPConnection struct {
 	bind_pw string
 }
 
-func (c LDAPConnection) Init(
+func (c *LDAPConnection) Init(
 	app *PlugApplication,
 	host,
 	bind_dn,
@@ -30,7 +30,7 @@ func (c LDAPConnection) Init(
 	c.reconnectToLDAP()
 }
 
-func (c LDAPConnection) reconnectToLDAP() {
+func (c *LDAPConnection) reconnectToLDAP() {
 	lcon, err := ldap.DialTLS("tcp", c.host,
 		&tls.Config{ServerName: "ldap.csh.rit.edu"})
 	if err != nil {

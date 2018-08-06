@@ -25,7 +25,7 @@ type PlugApplication struct {
 	auth_login_route string
 }
 
-func (a PlugApplication) Init(
+func (a *PlugApplication) Init(
 	db_uri,
 	s3_host,
 	s3_access_id,
@@ -43,7 +43,7 @@ func (a PlugApplication) Init(
 	auth_login_route string) {
 
 	// Database Connection
-	a.db.Init(&a, db_uri)
+	a.db.Init(a, db_uri)
 
 	// S3 Connection
 	a.s3.Init(s3_host,
@@ -51,7 +51,7 @@ func (a PlugApplication) Init(
 		s3_secret_key)
 
 	// LDAP connection
-	a.ldap.Init(&a, ldap_host, ldap_bind_dn, ldap_bind_pw)
+	a.ldap.Init(a, ldap_host, ldap_bind_dn, ldap_bind_pw)
 
 	a.base_path = base_path
 	a.router = a.createGinEngine()

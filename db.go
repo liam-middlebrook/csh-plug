@@ -46,7 +46,7 @@ const SQL_DELETE_PLUG = `DELETE from plugs WHERE id=$1::integer;`
 const SQL_INSERT_LOG = `INSERT into logs (time, severity, message)
 VALUES ($1, $2::integer, $3::text)`
 
-func (c DBConnection) Init(app *PlugApplication, db_uri string) {
+func (c *DBConnection) Init(app *PlugApplication, db_uri string) {
 	c.app = app
 	c.db_uri = db_uri
 	c.reconnectToDB()
@@ -54,7 +54,7 @@ func (c DBConnection) Init(app *PlugApplication, db_uri string) {
 	c.create_table_safe("logs", SQL_CREATE_LOG_TABLE)
 }
 
-func (c DBConnection) reconnectToDB() {
+func (c *DBConnection) reconnectToDB() {
 	db_con, err := sql.Open("postgres", c.db_uri)
 	if err != nil {
 		log.Fatal("error connecting to db!")
