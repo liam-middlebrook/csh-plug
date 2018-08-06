@@ -72,6 +72,7 @@ func (c DBConnection) pingDBAlive() {
 }
 
 func (c DBConnection) create_table_safe(name, sql string) {
+	c.pingDBAlive()
 	rows, err := c.con.Query("SELECT 1::integer FROM pg_tables WHERE schemaname = 'public' AND tablename = $1::text;",
 		name)
 	if err != nil {
