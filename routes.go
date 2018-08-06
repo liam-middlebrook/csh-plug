@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+type PlugRoutes struct {
+	app *PlugApplication
+}
+
 func protectedProfile(c *gin.Context) {
 	claims, ok := c.Value(csh_auth.AuthKey).(csh_auth.CSHClaims)
 	if !ok {
@@ -23,13 +27,13 @@ func protectedProfile(c *gin.Context) {
 	c.String(http.StatusOK, "uid %s email %s name %s uuid %s", claims.UserInfo.Username, claims.UserInfo.Email, claims.UserInfo.FullName, claims.UserInfo.Subject)
 }
 
-func index(c *gin.Context) {
+func (r PlugRoutes) index(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/upload")
 }
 
-func action(c *gin.Context) {
-	plug := GetPlug()
-	url := S3PresignPlug(plug)
+func (r PlugRoutes) action(c *gin.Context) {
+	plug := r.app.db.GetPlug()
+	url := r.app.s3.PresignPlug(plug)
 
 	claims, ok := c.Value(csh_auth.AuthKey).(csh_auth.CSHClaims)
 	if !ok {
@@ -42,11 +46,11 @@ func action(c *gin.Context) {
 		"plug_s3id":     plug.S3ID,
 		"presigned_uri": url.String(),
 	}).Info("Presigned URI Generated")
-	AddLog(13, c.GetHeader("Referer"))
+	r.app.db.AddLog(13, c.GetHeader("Referer"))
 	c.Redirect(http.StatusFound, url.String())
 }
 
-func upload(c *gin.Context) {
+func (r PlugRoutes) upload(c *gin.Context) {
 	plug := Plug{}
 
 	claims, ok := c.Value(csh_auth.AuthKey).(csh_auth.CSHClaims)
@@ -82,23 +86,23 @@ func upload(c *gin.Context) {
 		mime := getMime(data)
 		data.Seek(0, 0)
 
-		if !DecrementCredits(plug.Owner, 1) {
+		if !r.app.ldap.DecrementCredits(plug.Owner, 1) {
 			c.String(http.StatusPaymentRequired, "Get More Credits!")
 			return
 		}
 
 		plug.S3ID = time.Now().Format("2006/01/02/150405") + "-" + plug.Owner + "-" + file.Filename
-		S3AddFile(plug, data, mime)
+		r.app.s3.AddFile(plug, data, mime)
 
-		MakePlug(plug)
+		r.app.db.MakePlug(plug)
 	} else {
 		log.Error("invalid file dimensions")
 		c.String(http.StatusBadRequest, "Please upload a 728x200 pixel image!")
 		return
 	}
-	AddLog(1, "uid: "+plug.Owner+"uploaded plug s3id"+plug.S3ID)
+	r.app.db.AddLog(1, "uid: "+plug.Owner+"uploaded plug s3id"+plug.S3ID)
 	c.HTML(http.StatusOK, "success.tmpl", gin.H{
-		"plug_s3url": S3PresignPlug(plug).String(),
+		"plug_s3url": r.app.s3.PresignPlug(plug).String(),
 	})
 	log.WithFields(log.Fields{
 		"uid":       claims.UserInfo.Username,
@@ -107,27 +111,27 @@ func upload(c *gin.Context) {
 	}).Info("Uploaded new Plug!")
 }
 
-func upload_view(c *gin.Context) {
+func (r PlugRoutes) upload_view(c *gin.Context) {
 	c.HTML(http.StatusOK, "upload.tmpl", gin.H{})
 }
 
-func get_pending_plugs(c *gin.Context) {
+func (r PlugRoutes) get_pending_plugs(c *gin.Context) {
 	claims, ok := c.Value(csh_auth.AuthKey).(csh_auth.CSHClaims)
 	if !ok {
 		log.Fatal("error finding claims")
 		return
 	}
 
-	if !CheckIfAdmin(claims.UserInfo.Username) {
+	if !r.app.ldap.CheckIfAdmin(claims.UserInfo.Username) {
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
-	plugs := GetPendingPlugs()
+	plugs := r.app.db.GetPendingPlugs()
 	var out_plugs []Plug
 
 	for _, plug := range plugs {
 		new := plug
-		new.PresignedURL = S3PresignPlug(plug).String()
+		new.PresignedURL = r.app.s3.PresignPlug(plug).String()
 		out_plugs = append(out_plugs, new)
 	}
 	c.HTML(http.StatusOK, "view_plugs.tmpl", gin.H{
@@ -135,14 +139,14 @@ func get_pending_plugs(c *gin.Context) {
 	})
 }
 
-func plug_approval(c *gin.Context) {
+func (r PlugRoutes) plug_approval(c *gin.Context) {
 	claims, ok := c.Value(csh_auth.AuthKey).(csh_auth.CSHClaims)
 	if !ok {
 		log.Fatal("error finding claims")
 		return
 	}
 
-	if !CheckIfAdmin(claims.UserInfo.Username) {
+	if !r.app.ldap.CheckIfAdmin(claims.UserInfo.Username) {
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -155,20 +159,20 @@ func plug_approval(c *gin.Context) {
 		"plugs_approved": strings.Join(plugList.Data, ","),
 	}).Info("Changed Approved Plug List")
 
-	AddLog(1, "uid: "+claims.UserInfo.Username+"approved: "+strings.Join(plugList.Data, ","))
+	r.app.db.AddLog(1, "uid: "+claims.UserInfo.Username+"approved: "+strings.Join(plugList.Data, ","))
 
-	SetPendingPlugs(plugList.Data)
+	r.app.db.SetPendingPlugs(plugList.Data)
 	c.Redirect(http.StatusFound, "/admin")
 }
 
-func plug_deletion(c *gin.Context) {
+func (r PlugRoutes) plug_deletion(c *gin.Context) {
 	claims, ok := c.Value(csh_auth.AuthKey).(csh_auth.CSHClaims)
 	if !ok {
 		log.Fatal("error finding claims")
 		return
 	}
 
-	if !CheckIfAdmin(claims.UserInfo.Username) {
+	if !r.app.ldap.CheckIfAdmin(claims.UserInfo.Username) {
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
@@ -179,7 +183,7 @@ func plug_deletion(c *gin.Context) {
 		log.Error(err)
 	}
 
-	DeletePlug(GetPlugById(id))
+	r.app.db.DeletePlug(r.app.db.GetPlugById(id))
 
 	c.Redirect(http.StatusFound, "/admin")
 }

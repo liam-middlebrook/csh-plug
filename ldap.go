@@ -5,31 +5,47 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/ldap.v2"
-	"os"
 	"strconv"
 )
 
-var con *ldap.Conn
-var ldap_bind_env_var_name string
-var ldap_bindpw_env_var_name string
-var ldap_host_env_var_name string
-
-func reconnectToLDAP() *ldap.Conn {
-	lcon, err := ldap.DialTLS("tcp", os.Getenv(ldap_host_env_var_name),
-		&tls.Config{ServerName: "ldap.csh.rit.edu"})
-	if err != nil {
-		AddLog(0, "ldap connection error: "+err.Error())
-		log.Fatal(err)
-	}
-	err = lcon.Bind(os.Getenv(ldap_bind_env_var_name), os.Getenv(ldap_bindpw_env_var_name))
-	if err != nil {
-		AddLog(0, "ldap bind error: "+err.Error())
-		log.Fatal(err)
-	}
-	return lcon
+type LDAPConnection struct {
+	app     *PlugApplication
+	con     *ldap.Conn
+	host    string
+	bind_dn string
+	bind_pw string
 }
 
-func pingLDAPAlive() {
+func (c LDAPConnection) Init(
+	app *PlugApplication,
+	host,
+	bind_dn,
+	bind_pw string) {
+
+	c.app = app
+	c.host = host
+	c.bind_dn = bind_dn
+	c.bind_pw = bind_pw
+
+	c.reconnectToLDAP()
+}
+
+func (c LDAPConnection) reconnectToLDAP() {
+	lcon, err := ldap.DialTLS("tcp", c.host,
+		&tls.Config{ServerName: "ldap.csh.rit.edu"})
+	if err != nil {
+		c.app.db.AddLog(0, "ldap connection error: "+err.Error())
+		log.Fatal(err)
+	}
+	err = lcon.Bind(c.bind_dn, c.bind_pw)
+	if err != nil {
+		c.app.db.AddLog(0, "ldap bind error: "+err.Error())
+		log.Fatal(err)
+	}
+	c.con = lcon
+}
+
+func (c LDAPConnection) pingLDAPAlive() {
 	searchReq := ldap.NewSearchRequest(
 		"dc=csh,dc=rit,dc=edu",
 		ldap.ScopeBaseObject, ldap.NeverDerefAliases, 0, 0, false,
@@ -37,21 +53,14 @@ func pingLDAPAlive() {
 		[]string{"dn"},
 		nil,
 	)
-	_, err := con.Search(searchReq)
+	_, err := c.con.Search(searchReq)
 	if err != nil {
-		con = reconnectToLDAP()
+		c.reconnectToLDAP()
 	}
 }
 
-func LDAPInit(host, binddn, bindpw string) {
-	ldap_bind_env_var_name = binddn
-	ldap_bindpw_env_var_name = bindpw
-	ldap_host_env_var_name = host
-	con = reconnectToLDAP()
-}
-
-func CheckIfAdmin(username string) bool {
-	pingLDAPAlive()
+func (c LDAPConnection) CheckIfAdmin(username string) bool {
+	c.pingLDAPAlive()
 	searchRequest := ldap.NewSearchRequest(
 		"cn=users,cn=accounts,dc=csh,dc=rit,dc=edu",
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
@@ -60,17 +69,17 @@ func CheckIfAdmin(username string) bool {
 		nil,
 	)
 
-	sr, err := con.Search(searchRequest)
+	sr, err := c.con.Search(searchRequest)
 	if err != nil {
-		AddLog(0, "ldap search error: "+err.Error())
+		c.app.db.AddLog(0, "ldap search error: "+err.Error())
 		log.Fatal(err)
 		return false
 	}
 	return len(sr.Entries) > 0
 }
 
-func DecrementCredits(username string, credits int) bool {
-	pingLDAPAlive()
+func (c LDAPConnection) DecrementCredits(username string, credits int) bool {
+	c.pingLDAPAlive()
 	searchRequest := ldap.NewSearchRequest(
 		"uid="+username+",cn=users,cn=accounts,dc=csh,dc=rit,dc=edu",
 		ldap.ScopeBaseObject, ldap.NeverDerefAliases, 0, 0, false,
@@ -79,15 +88,15 @@ func DecrementCredits(username string, credits int) bool {
 		nil,
 	)
 
-	sr, err := con.Search(searchRequest)
+	sr, err := c.con.Search(searchRequest)
 	if err != nil {
-		AddLog(0, "ldap search error: "+err.Error())
+		c.app.db.AddLog(0, "ldap search error: "+err.Error())
 		log.Fatal(err)
 	}
 
 	balance, err := strconv.Atoi(sr.Entries[0].GetAttributeValue("drinkBalance"))
 	if err != nil {
-		AddLog(0, "ldap result parse error: "+err.Error())
+		c.app.db.AddLog(0, "ldap result parse error: "+err.Error())
 		log.Fatal(err)
 	}
 	log.Info("current balance for %s is %d", username, balance)
@@ -101,9 +110,9 @@ func DecrementCredits(username string, credits int) bool {
 
 	modifyRequest := ldap.NewModifyRequest("uid=" + username + ",cn=users,cn=accounts,dc=csh,dc=rit,dc=edu")
 	modifyRequest.Replace("drinkBalance", []string{fmt.Sprintf("%d", newBalance)})
-	err = con.Modify(modifyRequest)
+	err = c.con.Modify(modifyRequest)
 	if err != nil {
-		AddLog(0, "ldap modification error: "+err.Error())
+		c.app.db.AddLog(0, "ldap modification error: "+err.Error())
 		log.Fatal(err)
 	}
 	log.Info("current balance for %s is %d", username, newBalance)

@@ -4,13 +4,15 @@ import (
 	"database/sql"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
-	"os"
 	"strings"
 	"time"
 )
 
-var db *sql.DB
-var db_env_var_name string
+type DBConnection struct {
+	app    *PlugApplication
+	con    *sql.DB
+	db_uri string
+}
 
 const SQL_CREATE_PLUGS = `CREATE TABLE plugs (
 id              SERIAL PRIMARY KEY,
@@ -44,35 +46,36 @@ const SQL_DELETE_PLUG = `DELETE from plugs WHERE id=$1::integer;`
 const SQL_INSERT_LOG = `INSERT into logs (time, severity, message)
 VALUES ($1, $2::integer, $3::text)`
 
-func reconnectToDB() *sql.DB {
-	db_con, err := sql.Open("postgres", os.Getenv(db_env_var_name))
+func (c DBConnection) Init(app *PlugApplication, db_uri string) {
+	c.app = app
+	c.db_uri = db_uri
+	c.reconnectToDB()
+	c.create_table_safe("plugs", SQL_CREATE_PLUGS)
+	c.create_table_safe("logs", SQL_CREATE_LOG_TABLE)
+}
+
+func (c DBConnection) reconnectToDB() {
+	db_con, err := sql.Open("postgres", c.db_uri)
 	if err != nil {
 		log.Fatal("error connecting to db!")
 	}
-	return db_con
+	c.con = db_con
 }
 
-func pingDBAlive() {
-	if db.Ping() != nil {
-		db = reconnectToDB()
+func (c DBConnection) pingDBAlive() {
+	if c.con.Ping() != nil {
+		c.reconnectToDB()
 	}
 }
 
-func DBInit(env_var_name string) {
-	db_env_var_name = env_var_name
-	db = reconnectToDB()
-	create_table_safe("plugs", SQL_CREATE_PLUGS)
-	create_table_safe("logs", SQL_CREATE_LOG_TABLE)
-}
-
-func create_table_safe(name, sql string) {
-	rows, err := db.Query("SELECT 1::integer FROM pg_tables WHERE schemaname = 'public' AND tablename = $1::text;",
+func (c DBConnection) create_table_safe(name, sql string) {
+	rows, err := c.con.Query("SELECT 1::integer FROM pg_tables WHERE schemaname = 'public' AND tablename = $1::text;",
 		name)
 	if err != nil {
 		log.Error(err)
 	}
 	if !rows.Next() {
-		_, err = db.Exec(sql)
+		_, err = c.con.Exec(sql)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -80,8 +83,8 @@ func create_table_safe(name, sql string) {
 	}
 }
 
-func GetPlug() Plug {
-	rows, err := db.Query(SQL_RETRIEVE_APPROVED_PLUGS)
+func (c DBConnection) GetPlug() Plug {
+	rows, err := c.con.Query(SQL_RETRIEVE_APPROVED_PLUGS)
 
 	if err != nil {
 		log.Fatal(err)
@@ -102,23 +105,23 @@ func GetPlug() Plug {
 
 	if finalPlug.ViewsRemaining > 0 {
 		finalPlug.ViewsRemaining -= 1
-		_, err = db.Exec("UPDATE plugs SET views=$2::integer WHERE id=$1::integer;",
+		_, err = c.con.Exec("UPDATE plugs SET views=$2::integer WHERE id=$1::integer;",
 			finalPlug.ID, finalPlug.ViewsRemaining)
 		if err != nil {
 			log.Error(err)
 		}
 	}
 	if finalPlug.ViewsRemaining == 0 {
-		DeletePlug(finalPlug)
+		c.DeletePlug(finalPlug)
 		// try again
-		return GetPlug()
+		return c.GetPlug()
 	}
 
 	return finalPlug
 }
 
-func GetPlugById(id int) Plug {
-	rows, err := db.Query(SQL_RETRIEVE_PLUG_BY_ID, id)
+func (c DBConnection) GetPlugById(id int) Plug {
+	rows, err := c.con.Query(SQL_RETRIEVE_PLUG_BY_ID, id)
 
 	if err != nil {
 		log.Fatal(err)
@@ -141,17 +144,17 @@ func GetPlugById(id int) Plug {
 	return obj
 }
 
-func DeletePlug(plug Plug) {
-	_, err := db.Exec(SQL_DELETE_PLUG, plug.ID)
+func (c DBConnection) DeletePlug(plug Plug) {
+	_, err := c.con.Exec(SQL_DELETE_PLUG, plug.ID)
 	if err != nil {
 		log.Error(err)
 	}
-	S3DelFile(plug)
+	c.app.s3.DelFile(plug)
 
 }
 
-func GetPendingPlugs() []Plug {
-	rows, err := db.Query(SQL_RETRIEVE_PENDING_PLUGS)
+func (c DBConnection) GetPendingPlugs() []Plug {
+	rows, err := c.con.Query(SQL_RETRIEVE_PENDING_PLUGS)
 
 	if err != nil {
 		log.Fatal(err)
@@ -171,22 +174,22 @@ func GetPendingPlugs() []Plug {
 	return plugs
 }
 
-func SetPendingPlugs(approvedList []string) {
-	_, err := db.Exec("UPDATE plugs SET approved = false;")
+func (c DBConnection) SetPendingPlugs(approvedList []string) {
+	_, err := c.con.Exec("UPDATE plugs SET approved = false;")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	stringList := "," + strings.Join(approvedList, ",") + ","
-	_, err = db.Exec(SQL_SET_PENDING_PLUGS, stringList)
+	_, err = c.con.Exec(SQL_SET_PENDING_PLUGS, stringList)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func AddLog(severity int, message string) {
-	_, err := db.Exec(
+func (c DBConnection) AddLog(severity int, message string) {
+	_, err := c.con.Exec(
 		SQL_INSERT_LOG,
 		time.Now(),
 		severity,
@@ -197,8 +200,8 @@ func AddLog(severity int, message string) {
 	}
 }
 
-func MakePlug(plug Plug) {
-	_, err := db.Exec(
+func (c DBConnection) MakePlug(plug Plug) {
+	_, err := c.con.Exec(
 		SQL_CREATE_PLUG,
 		plug.S3ID,
 		plug.Owner,
