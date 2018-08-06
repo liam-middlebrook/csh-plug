@@ -63,7 +63,10 @@ func (c DBConnection) reconnectToDB() {
 }
 
 func (c DBConnection) pingDBAlive() {
-	if c.con.Ping() != nil {
+	err := c.con.Ping()
+	if err != nil {
+		log.Info("failed to ping db!")
+		log.Info(err)
 		c.reconnectToDB()
 	}
 }
