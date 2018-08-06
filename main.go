@@ -109,8 +109,6 @@ func main() {
 	var r PlugRoutes
 	r.app = &app
 
-	app.router.Static("/static", os.Getenv("BASE_PATH")+"static")
-
 	app.router.GET(app.auth_login_route, app.auth.AuthRequest)
 	app.router.GET("/auth/redir", app.auth.AuthCallback)
 	app.router.GET("/auth/logout", app.auth.AuthLogout)
