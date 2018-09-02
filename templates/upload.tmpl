@@ -31,6 +31,12 @@
 
                     <form action="/upload" method="post" enctype="multipart/form-data">
                         <div class="form-group">
+                            <input class="form-control-number" id="numCredits"
+                            name="numCredits" aria-describedby="numHelp"
+                            type="number" value="1">
+                            <small id="numHelp" class="form-text
+                            text-muted">Increase the number of credits to pay
+                            for extended-air-time.</small>
                             <input class="form-control-file" id="fileUpload" name="fileUpload" aria-describedby="fileHelp" type="file">
                             <small id="fileHelp" class="form-text text-muted">Your Plug must be approved before it will appear for viewing. Any member of the following groups (drink, eboard, rtp) can do so via the admin page.</small>
                         </div>

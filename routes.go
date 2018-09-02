@@ -60,7 +60,6 @@ func (r PlugRoutes) upload(c *gin.Context) {
 	}
 
 	plug.Owner = claims.UserInfo.Username
-	plug.ViewsRemaining = 1000
 
 	file, err := c.FormFile("fileUpload")
 	if err != nil {
@@ -83,13 +82,25 @@ func (r PlugRoutes) upload(c *gin.Context) {
 	}
 	data.Seek(0, 0)
 	if imageData.Width == 728 && imageData.Height == 200 {
+		numCredits, err := strconv.Atoi(c.PostForm("numCredits"))
+		if err != nil {
+			log.Error(err)
+			c.String(http.StatusUnsupportedMediaType, "Specify numCredits")
+			return
+		}
+		if numCredits < 0 {
+			log.Error(err)
+			c.String(http.StatusBadRequest, "Can't specify negative credits!")
+		}
 		mime := getMime(data)
 		data.Seek(0, 0)
 
-		if !r.app.ldap.DecrementCredits(plug.Owner, 1) {
+		if !r.app.ldap.DecrementCredits(plug.Owner, numCredits) {
 			c.String(http.StatusPaymentRequired, "Get More Credits!")
 			return
 		}
+
+		plug.ViewsRemaining = numCredits * 1000
 
 		plug.S3ID = time.Now().Format("2006/01/02/150405") + "-" + plug.Owner + "-" + file.Filename
 		r.app.s3.AddFile(plug, data, mime)
