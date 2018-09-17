@@ -194,6 +194,7 @@ func (r PlugRoutes) plug_deletion(c *gin.Context) {
 		log.Error(err)
 	}
 
+	r.app.db.AddLog(1, "uid: "+claims.UserInfo.Username+" deleted: "+c.Param("id"))
 	r.app.db.DeletePlug(r.app.db.GetPlugById(id))
 
 	c.Redirect(http.StatusFound, "/admin")
