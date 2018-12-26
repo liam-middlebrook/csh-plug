@@ -100,7 +100,7 @@ func (r PlugRoutes) upload(c *gin.Context) {
 			return
 		}
 
-		plug.ViewsRemaining = numCredits * 1000
+		plug.ViewsRemaining = numCredits * 50
 
 		plug.S3ID = time.Now().Format("2006/01/02/150405") + "-" + plug.Owner + "-" + file.Filename
 		r.app.s3.AddFile(plug, data, mime)
