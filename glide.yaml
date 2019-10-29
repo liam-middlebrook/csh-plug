@@ -1,5 +1,5 @@
 # The name of this package.
-package: github.com/liam-middlebrook/csh-plug
+package: github.com/computersciencehouse/csh-plug
 
 # External dependencies.
 import:
