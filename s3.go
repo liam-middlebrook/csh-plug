@@ -30,7 +30,9 @@ func (c S3Connection) PresignPlug(plug Plug) *url.URL {
 }
 
 func (c S3Connection) AddFile(plug Plug, data io.Reader, mime string) {
-	_, err := c.con.PutObject("plugs", plug.S3ID, data, mime)
+	opts := new(minio.PutObjectOptions)
+	opts.ContentType = mime
+	_, err := c.con.PutObject("plugs", plug.S3ID, data, -1, *opts)
 	if err != nil {
 		log.Error(err)
 	}
