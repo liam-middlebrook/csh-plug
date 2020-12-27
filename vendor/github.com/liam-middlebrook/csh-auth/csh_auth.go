@@ -41,7 +41,7 @@ type CSHClaims struct {
 }
 
 type CSHUserInfo struct {
-	Subject       string `json:"sub"`
+	Subject       string `json:"uuid"`
 	Profile       string `json:"profile"`
 	Email         string `json:"email"`
 	EmailVerified bool   `json:"email_verified"`
@@ -149,7 +149,7 @@ func (auth *CSHAuth) Init(clientID, clientSecret, secret, state, server_host, re
 		ClientSecret: auth.clientSecret,
 		Endpoint:     auth.provider.Endpoint(),
 		RedirectURL:  auth.redirect_uri,
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "email", "preferred_username", "name"},
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 }
 

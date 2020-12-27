@@ -71,11 +71,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:bb20f97b421080347b96b2999f23b4f25535488b920f4639bafcf59239ac520b"
+  digest = "1:0029c3918bb31ca6120ca607c568882e67a52e522025915a77b421511ea1727c"
   name = "github.com/liam-middlebrook/csh-auth"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5ebf2b9a509be653f7ed56ab14c7e6e57b6e01fa"
+  revision = "c9d95f626a7602707734adc87abe8d13ae28a405"
 
 [[projects]]
   digest = "1:12cb143f2148bf54bcd9fe622abac17325e85eeb1d84b8ec6caf1c80232108fd"
