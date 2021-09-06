@@ -42,3 +42,11 @@ func ChoosePlug(plugs []Plug) Plug {
 		return customs[rand.Intn(len(customs))]
 	}
 }
+
+func PlugValueInDrinkCredits(ldap LDAPConnection, username string) int {
+	if ldap.CheckIfIntroMember(username) {
+		return 1000
+	}
+
+	return 100
+}

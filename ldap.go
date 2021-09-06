@@ -78,6 +78,25 @@ func (c LDAPConnection) CheckIfAdmin(username string) bool {
 	return len(sr.Entries) > 0
 }
 
+func (c LDAPConnection) CheckIfIntroMember(username string) bool {
+	c.pingLDAPAlive()
+	searchRequest := ldap.NewSearchRequest(
+		"cn=users,cn=accounts,dc=csh,dc=rit,dc=edu",
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		"(&(memberof=cn=intromembers,cn=groups,cn=accounts,dc=csh,dc=rit,dc=edu)(uid="+username+"))",
+		[]string{"uid"},
+		nil,
+	)
+
+	sr, err := c.con.Search(searchRequest)
+	if err != nil {
+		c.app.db.AddLog(0, "ldap search error: "+err.Error())
+		log.Fatal(err)
+		return false
+	}
+	return len(sr.Entries) > 0
+}
+
 func (c LDAPConnection) DecrementCredits(username string, credits int) bool {
 	c.pingLDAPAlive()
 	searchRequest := ldap.NewSearchRequest(

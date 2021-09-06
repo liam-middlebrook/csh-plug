@@ -100,7 +100,7 @@ func (r PlugRoutes) upload(c *gin.Context) {
 			return
 		}
 
-		plug.ViewsRemaining = numCredits * 100
+		plug.ViewsRemaining = numCredits * PlugValueInDrinkCredits(r.app.ldap, claims.UserInfo.Username)
 
 		plug.S3ID = time.Now().Format("2006/01/02/150405") + "-" + plug.Owner + "-" + file.Filename
 		r.app.s3.AddFile(plug, data, mime)
@@ -138,7 +138,8 @@ func (r PlugRoutes) upload_view(c *gin.Context) {
 		out_plugs = append(out_plugs, new)
 	}
 	c.HTML(http.StatusOK, "upload.tmpl", gin.H{
-		"plugs": out_plugs,
+		"plugs":      out_plugs,
+		"plug_value": PlugValueInDrinkCredits(r.app.ldap, claims.UserInfo.Username),
 	})
 }
 
