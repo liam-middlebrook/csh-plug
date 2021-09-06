@@ -123,7 +123,23 @@ func (r PlugRoutes) upload(c *gin.Context) {
 }
 
 func (r PlugRoutes) upload_view(c *gin.Context) {
-	c.HTML(http.StatusOK, "upload.tmpl", gin.H{})
+	claims, ok := c.Value(csh_auth.AuthKey).(csh_auth.CSHClaims)
+	if !ok {
+		log.Fatal("error finding claims")
+		return
+	}
+
+	plugs := r.app.db.GetUserPlugs(claims.UserInfo.Username)
+	var out_plugs []Plug
+
+	for _, plug := range plugs {
+		new := plug
+		new.PresignedURL = r.app.s3.PresignPlug(plug).String()
+		out_plugs = append(out_plugs, new)
+	}
+	c.HTML(http.StatusOK, "upload.tmpl", gin.H{
+		"plugs": out_plugs,
+	})
 }
 
 func (r PlugRoutes) get_pending_plugs(c *gin.Context) {

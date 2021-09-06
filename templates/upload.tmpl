@@ -21,30 +21,47 @@
         </div>
     </nav>
 
+    <div class="container">
+        <h2>My Plugs:</h2>
+        <p>Plugs displayed below without color have not been approved for viewing yet.</p>
+        {{ range $element := .plugs }}
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="card mb-3">
+                    <!-- Make plugs which haven't been approved yet grayscale -->
+                    <img style="width: 100%; display: block;
+                    {{ if not $element.Approved }} filter: grayscale(100%); {{ end }}
+                    " src="{{$element.PresignedURL}}" alt="Plug by {{$element.Owner}}">
+                    <div class="card-footer text-muted">
+                        <p>{{$element.ViewsRemaining}} View(s) Remaining</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ end }}
+    </div>
     <div class="jumbotron">
         <div class="row justify-content-center">
             <div class="col-lg-7">
-                <div class="jumbotron" style="max-width: 800px">
-                    <h1 class="display-3">Upload a Plug!</h1>
-                    <p class="lead">You will lose 1 drink credit in exchange for a 100 view-limit of your plug.<br> Plugs must be 728x200 pixels and in PNG, or JPG format</p>
-                    <hr class="my-4">
+                <h2>Upload a Plug!</h2>
+                <p class="lead">You will lose 1 drink credit in exchange for a 100 view-limit of your plug.<br> Plugs must be 728x200 pixels and in PNG, or JPG format</p>
+                <hr class="my-4">
 
-                    <form action="/upload" method="post" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <input class="form-control-number" id="numCredits"
-                            name="numCredits" aria-describedby="numHelp"
-                            type="number" value="1">
-                            <small id="numHelp" class="form-text
-                            text-muted">Increase the number of credits to pay
-                            for extended-air-time.</small>
-                            <input class="form-control-file" id="fileUpload" name="fileUpload" aria-describedby="fileHelp" type="file">
-                            <small id="fileHelp" class="form-text text-muted">Your Plug must be approved before it will appear for viewing. Any member of the following groups (drink, eboard, rtp) can do so via the admin page.</small>
-                        </div>
-                        <div class="float-right">
-                            <input class="btn btn-primary btn-lg" href="/upload" role="button" value="Upload" name="submit" type="submit">
-                        </div>
-                    </form>
-                </div>
+                <form action="/upload" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input class="form-control-number" id="numCredits"
+                        name="numCredits" aria-describedby="numHelp"
+                        type="number" value="1">
+                        <small id="numHelp" class="form-text
+                        text-muted">Increase the number of credits to pay
+                        for extended-air-time.</small>
+                        <input class="form-control-file" id="fileUpload" name="fileUpload" aria-describedby="fileHelp" type="file">
+                        <small id="fileHelp" class="form-text text-muted">Your Plug must be approved before it will appear for viewing. Any member of the following groups (drink, eboard, rtp) can do so via the admin page.</small>
+                    </div>
+                    <div class="float-right">
+                        <input class="btn btn-primary btn-lg" href="/upload" role="button" value="Upload" name="submit" type="submit">
+                    </div>
+                </form>
             </div>
         </div>
     </div>

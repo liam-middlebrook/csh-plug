@@ -178,6 +178,29 @@ func (c DBConnection) GetPendingPlugs() []Plug {
 	return plugs
 }
 
+func (c DBConnection) GetUserPlugs(user string) []Plug {
+	rows, err := c.con.Query(SQL_RETRIEVE_PENDING_PLUGS)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var plugs []Plug
+	for rows.Next() {
+		var obj Plug
+		err = rows.Scan(&obj.ID, &obj.S3ID, &obj.Owner, &obj.ViewsRemaining, &obj.Approved)
+
+		if err != nil {
+			log.Error(err)
+		}
+		if obj.Owner == user {
+			plugs = append(plugs, obj)
+		}
+	}
+
+	return plugs
+}
+
 func (c DBConnection) SetPendingPlugs(approvedList []string) {
 	_, err := c.con.Exec("UPDATE plugs SET approved = false;")
 	if err != nil {
