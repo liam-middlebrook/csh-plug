@@ -91,6 +91,7 @@ func (r PlugRoutes) upload(c *gin.Context) {
 		if numCredits < 0 {
 			log.Error(err)
 			c.String(http.StatusBadRequest, "Can't specify negative credits!")
+			return
 		}
 		mime := getMime(data)
 		data.Seek(0, 0)
