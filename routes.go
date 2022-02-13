@@ -138,7 +138,15 @@ func (r PlugRoutes) upload_view(c *gin.Context) {
 		new.PresignedURL = r.app.s3.PresignPlug(plug).String()
 		out_plugs = append(out_plugs, new)
 	}
+
+	is_admin := r.app.ldap.CheckIfAdmin(claims.UserInfo.Username)
+	admin_link := ""
+	if is_admin {
+		admin_link = `Admin`
+	}
+
 	c.HTML(http.StatusOK, "upload.tmpl", gin.H{
+		"admin_link":   admin_link,
 		"plugs":      out_plugs,
 		"plug_value": PlugValueInDrinkCredits(r.app.ldap, claims.UserInfo.Username),
 	})
@@ -152,9 +160,11 @@ func (r PlugRoutes) get_pending_plugs(c *gin.Context) {
 	}
 
 	if !r.app.ldap.CheckIfAdmin(claims.UserInfo.Username) {
+		log.Info("Not authorized.")
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
+
 	plugs := r.app.db.GetPendingPlugs()
 	var out_plugs []Plug
 
